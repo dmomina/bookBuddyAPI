@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const client = require("./client");
 const { createUser, getUserByEmail } = require ("./users");
-const { createBook } = require("./books")
+const { createBook, getBooks } = require("./books")
 
 const users = [
     {
@@ -130,7 +130,7 @@ const seedDatabase = async() => {
         console.log("USERS ADDED SUCCESSFULLY!");
         console.log("INSERTING BOOKS...");
         await insertBooks();
-        console.log("BOOKS ADDED SUCCESSFULLY!")
+        await getBooks();
     } catch (err) {
         console.log(err);
     } finally {
