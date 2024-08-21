@@ -128,6 +128,9 @@ const seedDatabase = async() => {
         console.log("INSERTING USERS...");
         await insertUsers();
         console.log("USERS ADDED SUCCESSFULLY!");
+        console.log("INSERTING BOOKS...");
+        await insertBooks();
+        console.log("BOOKS ADDED SUCCESSFULLY!")
     } catch (err) {
         console.log(err);
     } finally {
