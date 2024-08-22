@@ -1,5 +1,5 @@
 const express = require("express");
-const { getBooks, getBook } = require("../db/books");
+const { getBooks, getBook, createBook } = require("../db/books");
 
 // create a router object for the /books routes
 
@@ -25,5 +25,16 @@ bookRouter.get("/:id", async (req, res) => {
     res.send({ err, message: "Something went wrong" });
   }
 });
+
+// {baseURL}/api.books
+bookRouter.post("/", async (req,res) => {
+  try {
+    const result = await createBook(req.body);
+    console.log(result);
+    res.send(result);
+  } catch (err) {
+    res.send(err);
+  } 
+})
 
 module.exports = bookRouter;
