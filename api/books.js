@@ -10,13 +10,12 @@ bookRouter.get("/", async (req, res) => {
   try {
     const results = await getBooks();
     res.send(results);
-  } catch(err) {
-    res.send({ err, message: "something went wrong" });
+  } catch (err) {
+    res.send({ err, message: "Something went wrong" });
   }
-  
 });
 
-// {baseURL}/api/books/:id
+// {baseUrl}/api/books/:id
 bookRouter.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
