@@ -1,5 +1,5 @@
 const express = require("express");
-const { getBooks, getBook, createBook } = require("../db/books");
+const { getBooks, getBook, createBook, deleteBook, updateBook } = require("../db/books");
 
 // create a router object for the /books routes
 
@@ -35,6 +35,26 @@ bookRouter.post("/", async (req,res) => {
   } catch (err) {
     res.send(err);
   } 
+})
+
+bookRouter.delete("/:id", async (req,res) => {
+  try {
+    const result = await deleteBook(req.params.id);
+    console.log(result);
+    res.send({ message:"book deleted successfully", id: result });
+  } catch (err) {
+    res.send(err);
+  }
+});
+
+bookRouter.patch("/:id", async (req, res) => {
+  try {
+    const result = await updateBook(req.params.id, req.body.available);
+    console.log(result);
+    res.send({ message:"updated successfully", result });
+  } catch (err) {
+    res.send(err);
+  }
 })
 
 module.exports = bookRouter;
