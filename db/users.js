@@ -1,11 +1,25 @@
 const client = require("./client");
+const bcrypt = require("bcrypt");
+const SALT_COUNT = 10;
 
-const createUser = async ({ firstname, lastname, email, password }) => {
+const createUser = async ({
+  firstname = "ASDFASDF",
+  lastname = "ASDASDF",
+  email,
+  password,
+}) => {
   try {
+    const hashedPassword = await bcrypt.hash(password, SALT_COUNT);
+    console.log(hashedPassword);
     const SQL = `INSERT INTO users(firstname, lastname, email, password) VALUES($1, $2, $3, $4) ON CONFLICT(email) DO NOTHING RETURNING id, firstname, lastname, email`;
     const {
       rows: [user],
-    } = await client.query(SQL, [firstname, lastname, email, password]);
+    } = await client.query(SQL, [
+      firstname || "firstname",
+      lastname || "lastname",
+      email,
+      hashedPassword,
+    ]);
 
     return user;
   } catch (err) {
@@ -21,6 +35,23 @@ const getUserByEmail = async (email) => {
     } = await client.query(SQL, [email]);
 
     return user;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getUser = async ({ email, password }) => {
+  console.log(email);
+  try {
+    const existingUser = await getUserByEmail(email);
+    if (!existingUser) return;
+    const hashedPassword = existingUser.password;
+    const passwordsMatch = await bcrypt.compare(password, hashedPassword);
+    if (!passwordsMatch) return;
+    console.log(existingUser);
+    delete existingUser.password;
+    console.log("existing user", existingUser);
+    return existingUser;
   } catch (err) {
     console.log(err);
   }
@@ -48,4 +79,4 @@ const getUsers = async () => {
   }
 };
 
-module.exports = { createUser, getUserByEmail, getUserById, getUsers };
+module.exports = { createUser, getUserByEmail, getUserById, getUsers, getUser };
