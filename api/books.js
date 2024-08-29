@@ -6,23 +6,37 @@ const { getBooks, getBook, createBook, deleteBook, updateBook } = require("../db
 const bookRouter = express.Router();
 
 // {baseUrl}/api/books
-bookRouter.get("/", async (req, res) => {
+bookRouter.get("/", async (req, res, next) => {
   try {
     const results = await getBooks();
     res.send(results);
   } catch (err) {
-    res.send({ err, message: "Something went wrong" });
+    next(err);
   }
 });
 
 // {baseUrl}/api/books/:id
-bookRouter.get("/:id", async (req, res) => {
+bookRouter.get("/:id", async (req, res, next) => {
+  const id = Number(req.params.id);
+  console.log(id);
+  if(isNaN(id) || req.params.id === " ") {
+    next({
+      name: "Invalid ID Format",
+      message: "The provided request parameter is not a valid book ID",
+    });
+    return;
+  }
   try {
-    const { id } = req.params;
     const result = await getBook(id);
+    if(!result){
+      next({
+        name: "Not Found",
+        message: "No matching book found",
+      });
+    }
     res.send(result);
   } catch (err) {
-    res.send({ err, message: "Something went wrong" });
+    next(err);
   }
 });
 
@@ -47,13 +61,40 @@ bookRouter.delete("/:id", async (req,res) => {
   }
 });
 
-bookRouter.patch("/:id", async (req, res) => {
+bookRouter.patch("/:id", async (req, res, next) => {
   try {
-    const result = await updateBook(req.params.id, req.body.available);
-    console.log(result);
-    res.send({ message:"updated successfully", result });
+    const id = Number(req.params.id);
+    if(isNaN(id) || req.params.id === " ") {
+      next({
+        name: "InvalidIDFormat",
+        message: "The provided request parameter is not a valid book ID."
+      });
+      return;
+    }
+    const result = await getBook(id);
+    if (result) {
+      next({
+        name: "Not Found",
+        message: "No matching book found",
+      });
+      return;
+    } else {
+      const updated = await updateBook(req.params.id, req.body.available);
+      if(updated) {
+        res.send({ 
+          message:"updated successfully", 
+          updated, 
+        });
+      } else {
+        next({
+          name: "UpdatedError",
+          message: "There was an errror updating this book.",
+        });
+        return;
+      }
+    }
   } catch (err) {
-    res.send(err);
+   next(err);
   }
 })
 

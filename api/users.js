@@ -36,21 +36,30 @@ userRouter.get("/me", (req, res) => {
 });
 
 // POST request to {baseUrl}/api/users/register
-userRouter.post("/register", async (req, res) => {
+userRouter.post("/register", async (req, res, next) => {
   const { firstname, lastname, email, password } = req.body;
   if (!email) {
-    res.send("Email not provided!");
+    next({
+      name: "EmailRequiredError",
+      message: "Email not provided",
+    });
     return;
   }
   if (!password) {
-    res.send("Password not provided!");
+    next({
+      name: "PasswordRequiredError",
+      message: "Password not provided",
+    });
     return;
     // do something here
   }
   try {
     const existingUser = await getUserByEmail(email);
     if (existingUser) {
-      res.send("user already registered with that email");
+      next({
+        name: "ExistingUserError",
+        message: "User already registered with that email"
+      });
       return;
     }
     const result = await createUser(req.body);
@@ -70,36 +79,41 @@ userRouter.post("/register", async (req, res) => {
         }, 
       });
     } else {
-      res.send("error registering, try later");
+      next({
+        name: "RegistrationError",
+        message: "Error registering, try later"
+      });
       return;
     }
-    console.log(result);
-    res.send("success");
   } catch (err) {
-    res.send(err);
+    next(err);
   }
 });
 
-userRouter.post("/login", async (req, res) => {
-  console.log(req.body.email);
+userRouter.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    res.send("Missing credentials - must supply both an email and password");
-    return;
+    next({
+      name: "MissingCredentialsError",
+      message: "Please supply both an email and password!",
+    });
   }
   try {
     const result = await getUser(req.body);
-    if(result){
+    if (result) {
       const token = jwt.sign({ id: result.id, email }, process.env.JWT_SECRET,{
         expiresIn:"1w",
       });
       res.send({ message:"Login Successfull!", token });
       // create your token here and send with user id and email
-    }else{
-      res.send("wrong credentials")
+    } else {
+      next({
+        name: "IncorrectCredentialsError",
+        message: "Username or password is incorrect",
+      });
     }
   } catch (err) {
-    res.send("something went wrong");
+    next(err);
   }
 });
 
