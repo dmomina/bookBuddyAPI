@@ -3,14 +3,31 @@ const apiRouter = express.Router();
 const jwt = require("jsonwebtoken");
 const { getUserById } = require("../db/users");
 
-apiRouter.use((req, res, next) => {
+apiRouter.use(async (req, res, next) => {
   const auth = req.header('Authorization');
   const prefix = 'Bearer';
   if(!auth) {
     next();
   } else if (auth.startsWith(prefix)) {
     console.log(auth);
-    console.log("it looks ok");
+    const token = auth.slice(prefix.length);
+    try {
+      console.log("checking");
+      const parsedToken = jwt.verify(token, process.env.JWT_SECRET);
+      const id = parsedToken && parsedToken.id;
+      if(id) {
+        req.user = await getUserById(id);
+        console.log("the request user", req.user);
+        next();
+      }
+    } catch (err) {
+        next(err);
+   }
+  } else {
+    next({
+      name: "AuthorizationHeaderError",
+      message: ""
+    })
   }
   next();
 });
