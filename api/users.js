@@ -6,9 +6,11 @@ const {
   getUsers,
   getUserByEmail,
   createUser,
-} = require("../db/users");
+} = require("../db");
 
 const jwt = require("jsonwebtoken");
+
+const { requireUser } = require("./utils");
 
 userRouter.get("/", async (req, res) => {
   try {
@@ -31,7 +33,7 @@ userRouter.get("/", async (req, res) => {
 // });
 
 // {baseUrl}/users/me
-userRouter.get("/me", (req, res) => {
+userRouter.get("/me", requireUser, (req, res) => {
   res.send("here is your account info");
 });
 
@@ -39,18 +41,13 @@ userRouter.get("/me", (req, res) => {
 userRouter.post("/register", async (req, res, next) => {
   const { firstname, lastname, email, password } = req.body;
   if (!email) {
-    next({
-      name: "EmailRequiredError",
-      message: "Email not provided",
-    });
+    next({ name: "EmailRequiredError", message: "Email not provided!" });
     return;
   }
   if (!password) {
-    next({
-      name: "PasswordRequiredError",
-      message: "Password not provided",
-    });
+    next({ name: "PasswordRequiredError", message: "Password not provided!" });
     return;
+
     // do something here
   }
   try {
@@ -58,30 +55,31 @@ userRouter.post("/register", async (req, res, next) => {
     if (existingUser) {
       next({
         name: "ExistingUserError",
-        message: "User already registered with that email"
+        message: "user already registered with that email",
       });
       return;
     }
     const result = await createUser(req.body);
     if (result) {
-      const token = jwt.sign({ id: result.id, email }, process.env.JWT_SECRET,{
-        expiresIn:"1w",
+      const token = jwt.sign({ id: result.id, email }, process.env.JWT_SECRET, {
+        expiresIn: "1w",
       });
       console.log(token);
-      res.send({ 
-        message:"Registration Successful!", 
-        token, 
+      res.send({
+        mesage: "Registration Successful!",
+        token,
         user: {
-          id: result.id, 
-          firstname: result.firstname, 
-          lastname: result.lastname, 
-          email: result.email
-        }, 
+          id: result.id,
+          firstname: result.firstname,
+          lastname: result.lastname,
+          email: result.email,
+        },
       });
+      return;
     } else {
       next({
         name: "RegistrationError",
-        message: "Error registering, try later"
+        message: "error registering, try later",
       });
       return;
     }
@@ -101,11 +99,11 @@ userRouter.post("/login", async (req, res, next) => {
   try {
     const result = await getUser(req.body);
     if (result) {
-      const token = jwt.sign({ id: result.id, email }, process.env.JWT_SECRET,{
-        expiresIn:"1w",
-      });
-      res.send({ message:"Login Successfull!", token });
       // create your token here and send with user id and email
+      const token = jwt.sign({ id: result.id, email }, process.env.JWT_SECRET, {
+        expiresIn: "1w",
+      });
+      res.send({ message: "Login successful", token });
     } else {
       next({
         name: "IncorrectCredentialsError",

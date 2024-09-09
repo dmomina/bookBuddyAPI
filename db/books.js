@@ -9,7 +9,7 @@ const getBooks = async () => {
     }
     return rows;
   } catch (err) {
-    console.log(err);
+    res.send(err);
   }
 };
 
@@ -40,7 +40,8 @@ const createBook = async ({
       title,
       author,
       description,
-      coverImage || "https://images.pexels.com/photos/7034646/pexels-photo-7034646.jpeg",
+      coverImage ||
+        "https://images.pexels.com/photos/7034646/pexels-photo-7034646.jpeg",
       available || true,
     ]);
     return book;
@@ -53,9 +54,10 @@ const deleteBook = async (id) => {
   try {
     const SQL = `DELETE FROM books WHERE id=$1 RETURNING *`;
     const {
-      rows: [book],
+      rows: [result],
     } = await client.query(SQL, [id]);
-    return book;
+
+    return result;
   } catch (err) {
     console.log(err);
   }
@@ -63,7 +65,7 @@ const deleteBook = async (id) => {
 
 const updateBook = async (id, available) => {
   try {
-    const SQL = `UPDATE books SET available=$1 WHERE id=$2 RETURNING *`
+    const SQL = `UPDATE books SET available=$1 WHERE id=$2 RETURNING *`;
     const {
       rows: [book],
     } = await client.query(SQL, [available, id]);
@@ -71,6 +73,6 @@ const updateBook = async (id, available) => {
   } catch (err) {
     console.log(err);
   }
-}
+};
 
 module.exports = { createBook, getBooks, getBook, deleteBook, updateBook };

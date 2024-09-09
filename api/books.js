@@ -1,6 +1,14 @@
 const express = require("express");
-const { getBooks, getBook, createBook, deleteBook, updateBook } = require("../db/books");
+const {
+  getBooks,
+  getBook,
+  createBook,
+  deleteBook,
+  updateBook,
+} = require("../db");
 
+const { createReservation } = require("../db/reservations");
+const { requireUser } = require("./utils");
 // create a router object for the /books routes
 
 const bookRouter = express.Router();
@@ -17,22 +25,21 @@ bookRouter.get("/", async (req, res, next) => {
 
 // {baseUrl}/api/books/:id
 bookRouter.get("/:id", async (req, res, next) => {
-  const id = Number(req.params.id);
-  console.log(id);
-  if(isNaN(id) || req.params.id === " ") {
-    next({
-      name: "Invalid ID Format",
-      message: "The provided request parameter is not a valid book ID",
-    });
-    return;
-  }
   try {
-    const result = await getBook(id);
-    if(!result){
+    const id = Number(req.params.id);
+
+    console.log(id);
+    if (isNaN(id) || req.params.id === " ") {
       next({
-        name: "Not Found",
-        message: "No matching book found",
+        name: "InvalidIDFormat",
+        message: "The provided request parameter is not a valid book ID",
       });
+      return;
+    }
+    const result = await getBook(id);
+    if (!result) {
+      next({ name: "Not Found", message: "No matching book found" });
+      return;
     }
     res.send(result);
   } catch (err) {
@@ -40,62 +47,61 @@ bookRouter.get("/:id", async (req, res, next) => {
   }
 });
 
-// {baseURL}/api.books
-bookRouter.post("/", async (req,res) => {
+// {baseUrl}/api/books
+bookRouter.post("/", async (req, res) => {
   try {
     const result = await createBook(req.body);
     console.log(result);
     res.send(result);
   } catch (err) {
-    res.send(err);
-  } 
-})
+    console.log(err);
+  }
+});
 
-bookRouter.delete("/:id", async (req,res) => {
+bookRouter.delete("/:id", async (req, res) => {
   try {
     const result = await deleteBook(req.params.id);
     console.log(result);
-    res.send({ message:"book deleted successfully", id: result });
+    res.send({ message: "book deleted succesfully", id: result });
   } catch (err) {
     res.send(err);
   }
 });
 
-bookRouter.patch("/:id", async (req, res, next) => {
+bookRouter.patch("/:id", requireUser, async (req, res, next) => {
+  console.log("USER", req.user);
   try {
     const id = Number(req.params.id);
-    if(isNaN(id) || req.params.id === " ") {
+    if (isNaN(id) || req.params.id === " ") {
       next({
         name: "InvalidIDFormat",
-        message: "The provided request parameter is not a valid book ID."
+        message: "The provided request parameter is not a valid book ID.",
       });
       return;
     }
     const result = await getBook(id);
-    if (result) {
-      next({
-        name: "Not Found",
-        message: "No matching book found",
-      });
+    if (!result) {
+      next({ name: "Not Found", message: "no matching book found" });
       return;
     } else {
       const updated = await updateBook(req.params.id, req.body.available);
-      if(updated) {
-        res.send({ 
-          message:"updated successfully", 
-          updated, 
+      if (updated) {
+        await createReservation({ userId: req.user.id, booksId: updated.id });
+        res.send({
+          message: "updated successfully",
+          updated,
         });
       } else {
         next({
-          name: "UpdatedError",
-          message: "There was an errror updating this book.",
+          name: "UpdateError",
+          message: "There was an error updating this book.",
         });
         return;
       }
     }
   } catch (err) {
-   next(err);
+    next(err);
   }
-})
+});
 
 module.exports = bookRouter;
