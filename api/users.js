@@ -5,21 +5,13 @@ const {
   getUser,
   getUsers,
   getUserByEmail,
+  getUsersReservations,
   createUser,
 } = require("../db");
 
 const jwt = require("jsonwebtoken");
 
 const { requireUser } = require("./utils");
-
-userRouter.get("/", async (req, res) => {
-  try {
-    const results = await getUsers();
-    res.send(results);
-  } catch (err) {
-    res.send({ err, message: "something went wrong" });
-  }
-});
 
 // {baseUrl}/users/id
 // userRouter.get("/:id", async (req, res) => {
@@ -33,8 +25,17 @@ userRouter.get("/", async (req, res) => {
 // });
 
 // {baseUrl}/users/me
-userRouter.get("/me", requireUser, (req, res) => {
-  res.send("here is your account info");
+userRouter.get("/me", requireUser, async (req, res, next) => {
+  try {
+    if (req.user) {
+      const userReservations = await getUsersReservations(req.user.id);
+      console.log(userReservations);
+      req.user.books = userReservations;
+      res.send(req.user);
+    } else {
+      res.send("Error, make sure you're logged in correctly.");
+    }
+  } catch (err) {}
 });
 
 // POST request to {baseUrl}/api/users/register
@@ -110,14 +111,6 @@ userRouter.post("/login", async (req, res, next) => {
         message: "Username or password is incorrect",
       });
     }
-  } catch (err) {
-    next(err);
-  }
-});
-
-userRouter.get("/test", async (req, res, next) => {
-  try {
-    resjson();
   } catch (err) {
     next(err);
   }

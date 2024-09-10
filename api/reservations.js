@@ -5,16 +5,23 @@ const { requireUser } = require("./utils");
 
 const {
   getReservation,
+  getUsersReservations,
   deleteReservation,
   updateBook,
   getBook,
 } = require("../db");
 
-reservationsRouter.get("/", (req, res) => {
-  res.send("hello from reservations");
+reservationsRouter.get("/", requireUser, async (req, res, next) => {
+  try {
+    const reservations = await getUsersReservations(req.user.id);
+    console.log(reservations);
+    res.send("reservations here");
+  } catch (err) {
+    next(err);
+  }
 });
 
-reservationsRouter.delete("/:id", async (req, res, next) => {
+reservationsRouter.delete("/:id", requireUser, async (req, res, next) => {
   try {
     // first check if a reservation with that id exists
     const reservation = await getReservation(req.params.id);
@@ -39,15 +46,12 @@ reservationsRouter.delete("/:id", async (req, res, next) => {
       // -- if they DO match, two things - delete the reservation (using deleteReservation function), confirm
       // ---that the deletion was successful AND THEN update the book to be available again (set available:true);
       const deletedReservation = await deleteReservation(req.params.id);
-      console.log(deleteReservation);
-      const book = await getBook(deletedReservation.bookId);
+      const book = await getBook(deletedReservation.bookid);
       if (deletedReservation) {
         updateBook(book.id, true);
       }
       res.send({ deletedReservation });
     }
-
-    res.send("deleted");
   } catch (err) {
     next(err);
   }

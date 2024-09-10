@@ -48,7 +48,7 @@ bookRouter.get("/:id", async (req, res, next) => {
 });
 
 // {baseUrl}/api/books
-bookRouter.post("/", async (req, res) => {
+bookRouter.post("/", requireUser, async (req, res) => {
   try {
     const result = await createBook(req.body);
     console.log(result);
@@ -58,7 +58,7 @@ bookRouter.post("/", async (req, res) => {
   }
 });
 
-bookRouter.delete("/:id", async (req, res) => {
+bookRouter.delete("/:id", requireUser, async (req, res) => {
   try {
     const result = await deleteBook(req.params.id);
     console.log(result);

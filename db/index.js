@@ -1,5 +1,5 @@
 module.exports = {
-    ...require("./books"),
-    ...require("./users"),
-    ...require("./reservations"),
-  };
+  ...require("./books"),
+  ...require("./users"),
+  ...require("./reservations"),
+};
