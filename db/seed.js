@@ -472,12 +472,12 @@ const books = [
       'https://upload.wikimedia.org/wikipedia/en/9/97/Corduroy_book_cover.jpg',
     available: true,
   },
-  {
+  /* {
     title: 'The Paper Bag Princess',
     author: 'Robert Munsch',
     description:
       "The Paper Bag Princess is a children's picture book by Canadian author Robert Munsch. It was first published in 1980 and tells the story of Princess Winnifred, who saves Prince Ronald from a dragon. The book is a humorous and empowering story about the importance of being brave and resourceful.",
-  },
+  },*/
  ];
  
 const dropTables = async () => {
