@@ -1,28 +1,26 @@
 {
   "name": "bookbuddyapi",
   "version": "1.0.0",
-  "description": "API for the bookbuddy react project",
+  "description": "Api for the bookbuddy react project",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
-    "start": "node index.js",
     "seed:dev": "nodemon ./db/seed.js",
     "seed": "node ./db/seed.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/dmomina/bookBuddyAPI.git"
+    "url": "git+https://github.com/byronholmes2022/bookBuddyAPI.git"
   },
-  "author": "",
+  "author": "byronholmes2022",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dmomina/bookBuddyAPI/issues"
+    "url": "https://github.com/byronholmes2022/bookBuddyAPI/issues"
   },
-  "homepage": "https://github.com/dmomina/bookBuddyAPI#readme",
+  "homepage": "https://github.com/byronholmes2022/bookBuddyAPI#readme",
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",

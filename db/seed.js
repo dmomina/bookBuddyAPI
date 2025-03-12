@@ -479,7 +479,7 @@ const books = [
       "The Paper Bag Princess is a children's picture book by Canadian author Robert Munsch. It was first published in 1980 and tells the story of Princess Winnifred, who saves Prince Ronald from a dragon. The book is a humorous and empowering story about the importance of being brave and resourceful.",
   },*/
  ];
- 
+
 const dropTables = async () => {
   try {
     await client.query(`DROP TABLE IF EXISTS users CASCADE`);
