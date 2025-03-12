@@ -1,10 +1,12 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 require("dotenv").config();
 const client = require("./db/client");
 client.connect();
 const PORT = 3000;
 app.use(express.json());
+app.use(cors());
 
 // we're registering the routes in /api/index.js ===> IOW, request to /api ---> send request to /api/index.js
 app.use("/api", require("./api"));
